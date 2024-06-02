@@ -1,18 +1,20 @@
-import { useContext, useState } from "react";
+import axios from "axios";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "./context/AuthContext";
-import axios from "axios";
 
-function Login() {
-  const { LOGIN } = useContext(AuthContext);
-
+function Register() {
   const router = useNavigate();
 
-  const [userData, setUserData] = useState({ email: "", password: "" });
-  console.log(userData, "userData");
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   // userData.name
   // userData[name]
+  console.log(userData, "userData");
 
   function handleChange(event) {
     // console.log(event.target.value, event.target.name)
@@ -21,22 +23,29 @@ function Login() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (userData.email && userData.password) {
+    if (
+      userData.name &&
+      userData.email &&
+      userData.password &&
+      userData.confirmPassword
+    ) {
       // await calling backend one server to another server request, backend validation, data to store mongodb
       try {
         const response = await axios.post(
-          "http://localhost:3001/api/v1/auth/login",
-          { userData },
-          { withCredentials: true }
+          "http://localhost:3001/api/v1/auth/register",
+          { userData }
         );
-        // const response = { data: { success: true, message: "Login Sucessfull.", token: "abcdefghi", userData: { name: 'Awdiz', email: "awdiz@gmail.com" } } }
+        // const response = { data: { success: true, message: "Registeration Completed." } }
         // return res.status(201).json({ success: true, message: "Registeration Completed." })
         if (response.data.success) {
-          // localStorage.setItem("token", JSON.stringify(response.data.token))
-          LOGIN(response.data.userData);
-          setUserData({ email: "", password: "" });
+          setUserData({
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+          });
           toast.success(response.data.message);
-          router("/");
+          router("/login");
         }
       } catch (error) {
         toast.error(error.response.data.message);
@@ -48,12 +57,21 @@ function Login() {
 
   return (
     <div>
-      <h1>Login</h1>
+      <h1>Register</h1>
       <form onSubmit={handleSubmit}>
+        <label>Name : </label>
+        <br />
+        <input
+          type="text"
+          name="name"
+          value={userData.name}
+          onChange={handleChange}
+          required
+        />
+        <br />
         <label>Email : </label>
         <br />
         <input
-          style={{ border: "1px solid red" }}
           type="email"
           name="email"
           value={userData.email}
@@ -71,10 +89,20 @@ function Login() {
           required
         />
         <br />
-        <input type="submit" value="Login" />
+        <label>Confirm Password : </label>
+        <br />
+        <input
+          type="password"
+          name="confirmPassword"
+          value={userData.confirmPassword}
+          onChange={handleChange}
+          required
+        />
+        <br />
+        <input type="submit" value="Register" />
       </form>
     </div>
   );
 }
 
-export default Login
+export default Register
